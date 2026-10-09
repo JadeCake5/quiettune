@@ -23,7 +23,7 @@ cd quiettune
 
 ### 使用完整桌面包
 
-在 [Releases 下载 Windows 安装包](https://github.com/JadeCake5/quiettune/releases/latest)，选择 `QuietTune-1.1.3-Windows-x64-安装.exe`，双击安装。中文安装器可选择安装目录并创建快捷方式。Release 同时提供 SHA-256 校验和、许可及[第三方源码与来源资料](THIRD-PARTY-SOURCES.md)；无需下载源码即可使用。
+在 [Releases 下载 Windows 安装包](https://github.com/JadeCake5/quiettune/releases/latest)，选择 `QuietTune-1.1.3-Windows-x64-Setup.exe`，双击安装。中文安装器可选择安装目录并创建快捷方式。Release 同时提供 SHA-256 校验和、许可及[第三方源码与来源资料](THIRD-PARTY-SOURCES.md)；无需下载源码即可使用。
 
 需要自行构建时，请按下文源码准备及构建步骤生成安装器或免安装目录。免安装目录须保留完整内容，不能只复制其中的 EXE。
 
