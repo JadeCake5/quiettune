@@ -105,10 +105,48 @@ with sync_playwright() as playwright:
             page.get_by_role("textbox", name="搜索歌曲").fill("")
             page.get_by_role("button", name="Vibe Ace", exact=False).first.click()
             page.get_by_role("heading", name="听见每个片段的变化").wait_for()
+            preview = page.get_by_role("button", name="试听音乐", exact=True)
+            pause_preview = page.get_by_role("button", name="暂停音乐", exact=True)
+            preview.click()
+            pause_preview.wait_for()
+            page.wait_for_function("!document.querySelector('audio').paused && document.querySelector('audio').currentTime > 0.5")
+            assert "lucide-pause" in (pause_preview.locator("svg").get_attribute("class") or ""), "播放时没有显示暂停图标。"
+            pause_preview.click()
+            preview.wait_for()
+            paused = page.locator("audio").evaluate("audio => ({paused: audio.paused, time: audio.currentTime})")
+            assert paused["paused"], "详情暂停按钮没有暂停实际音乐。"
+            page.wait_for_timeout(300)
+            assert abs(page.locator("audio").evaluate("audio => audio.currentTime") - paused["time"]) < 0.05, "暂停后播放进度仍在前进。"
+            preview.click()
+            pause_preview.wait_for()
+            assert page.locator("audio").evaluate("audio => audio.currentTime") >= paused["time"] - 0.15, "续播没有保留暂停位置。"
+            page.wait_for_function("time => !document.querySelector('audio').paused && document.querySelector('audio').currentTime > time", arg=paused["time"])
+            page.get_by_role("button", name="暂停", exact=True).click()
+            preview.wait_for()
+            assert "lucide-play" in (preview.locator("svg").get_attribute("class") or ""), "暂停后没有恢复播放图标。"
+            page.locator("audio").evaluate("audio => { audio.play = () => Promise.reject(new DOMException('测试拒绝播放', 'NotAllowedError')) }")
+            preview.click()
+            page.get_by_text("请点击播放按钮试听该片段。", exact=True).wait_for()
+            assert preview.is_visible() and page.locator("audio").evaluate("audio => audio.paused"), "播放被拒绝后按钮状态不正确。"
+            page.locator("audio").evaluate("audio => { delete audio.play }")
+            page.get_by_role("button", name="关闭提示", exact=True).click()
+            page.get_by_role("button", name="播放", exact=True).click()
+            pause_preview.wait_for()
             page.get_by_role("button", name="试听最高片段", exact=False).click()
             page.wait_for_timeout(1200)
             playback = page.locator("audio").evaluate("audio => ({time:audio.currentTime,paused:audio.paused,ready:audio.readyState})")
             assert playback["ready"] >= 2 and playback["time"] > 0 and not playback["paused"], playback
+            # 使用媒体自身时长并自然播放尾部，避免把进度滑块的末端舍入当成结束事件。
+            page.locator("audio").evaluate("async audio => { audio.currentTime = Math.max(0, audio.duration - 1); await audio.play() }")
+            try:
+                page.wait_for_function("document.querySelector('audio').ended")
+            except Exception as error:
+                state = page.locator("audio").evaluate("audio => ({time: audio.currentTime, duration: audio.duration, paused: audio.paused, ended: audio.ended, seeking: audio.seeking, ready: audio.readyState})")
+                raise AssertionError(f"音乐没有自然播放结束：{state}") from error
+            preview.wait_for()
+            assert page.get_by_role("button", name="播放", exact=True).is_visible(), "播放结束后底部状态没有恢复。"
+            page.get_by_role("button", name="试听最高片段", exact=False).click()
+            pause_preview.wait_for()
             page.get_by_role("button", name="一般", exact=True).click()
             page.get_by_role("button", name="保存我的评价").click()
             page.get_by_text("评价已保存。", exact=True).wait_for()
@@ -134,7 +172,8 @@ with sync_playwright() as playwright:
             page.wait_for_timeout(300)
             result = {"status": "通过", "executable": str(EXE), "backend_url": url, "without_system_developer_tools": True,
                       "health": health, "ai": detail["features"]["ai"], "score": detail["score"]["combined"], "playback": playback,
-                      "checked": ["真实 Electron", "模型缓存", "界面导入真实音频", "实际 AI 推理", "分段图表", "搜索", "Range", "时间跳转播放", "反馈缓存", "深浅主题", "偏好不足提示", "CSV 导出", "重启持久化", "关闭服务清理"]}
+                      "preview_button": {"paused_at": paused["time"], "resume_position_preserved": True, "footer_synchronized": True, "blocked_playback_recovered": True, "ended_recovered": True},
+                      "checked": ["真实 Electron", "模型缓存", "界面导入真实音频", "实际 AI 推理", "分段图表", "搜索", "Range", "时间跳转播放", "详情试听与暂停", "上下播放状态同步", "播放结束与拒绝恢复", "反馈缓存", "深浅主题", "偏好不足提示", "CSV 导出", "重启持久化", "关闭服务清理"]}
     finally:
         close(process, page, output, url)
     process, browser, page, output = launch(playwright)

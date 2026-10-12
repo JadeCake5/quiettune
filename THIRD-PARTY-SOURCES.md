@@ -4,7 +4,7 @@ QuietTune 的完整应用源码随每个 Release 的版本标签提供。Windows
 
 | 组件 | 本版本使用的版本或提交 | 官方源码与构建资料 |
 | --- | --- | --- |
-| QuietTune | 1.1.3 | [v1.1.3 源码](https://github.com/JadeCake5/quiettune/tree/v1.1.3)，构建入口为 `package.json`、`desktop/prepare-runtime.ps1`，Python/npm 依赖均有锁文件。 |
+| QuietTune | 1.1.4 | [v1.1.4 源码](https://github.com/JadeCake5/quiettune/tree/v1.1.4)，构建入口为 `package.json`、`desktop/prepare-runtime.ps1`，Python/npm 依赖均有锁文件。 |
 | Essentia.js | 0.1.3，`f46c91c08bdf263d5f3d575ab8fb0f9b81695acf` | [官方源码](https://github.com/MTG/essentia.js/tree/f46c91c08bdf263d5f3d575ab8fb0f9b81695acf)，包含 `Dockerfile`、`Makefile.essentiajs`、`build-libs.sh` 和 C++/JavaScript 绑定。该提交与 npm 0.1.3 的 gitHead 一致。 |
 | Essentia | Essentia.js 官方 WASM 内的算法 | [官方核心源码](https://github.com/MTG/essentia)，官方 0.1.3 的 Dockerfile 描述核心及 Eigen 的构建方式；其上游构建未将核心 Git 提交固定在脚本中，本项目没有自行重编该 WASM。 |
 | FFmpeg/FFprobe | Gyan 9.0.1 full build，`bf1b838f2ab88b4f8fd83443325c782ea0e0f7fa` | [对应 FFmpeg 源码](https://github.com/FFmpeg/FFmpeg/tree/bf1b838f2ab88b4f8fd83443325c782ea0e0f7fa)。附带 Gyan 原始 README、完整组件版本列表、GPL 原文和实际 `-buildconf` 输出。静态链接的外部库分别保留各自许可与源码义务。 |
